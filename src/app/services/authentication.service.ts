@@ -1,66 +1,73 @@
+
 import { Injectable } from '@angular/core';
+import {HttpClient, HttpEvent, HttpRequest} from '@angular/common/http';
+import {Observable} from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
+  public host:string="https://localhost:8443";
+  public authenticated: boolean;
+  public authenticatedUser;
   private users=[
-      {username:'admin',password:'1234',roles:['ADMIN','USER']},
-      {username:'user1',password:'1234',roles:['USER']},
-      {username:'user2',password:'1234',roles:['USER']}
-  ];
-  public isAuthenticated:boolean;
-  public userAuthenticated;
-  public token: string;
+    {username:"admin", password:"1234",roles:['USER','ADMIN']},
+    {username:"user1", password:"1234",roles:['USER']},
+    {username:"user2", password:"1234",roles:['USER']}
+  ]
 
-  constructor() { }
+  constructor(private http:HttpClient) {
+  }
 
-  public login(username:string,password:string){
-let user;
-this.users.forEach(u=>{
- if(u.username==username && u.password==password){
-   user=u;
-   this.token = btoa(JSON.stringify({username:u.username,roles:u.roles}));
- }
-});
-if(user){
-  this.isAuthenticated=true;
-  this.userAuthenticated=user;
-}
-else{
-  this.isAuthenticated=false;
-  this.userAuthenticated=undefined;
-}
+  login(username:string,password:string){
+    let user;
+    this.users.forEach(u=>{
+      if(u.username===username && u.password===password){
+        user=u;
+      }
+    })
+    if(user){
+      this.authenticated=true;
+      this.authenticatedUser=user;
+      localStorage.setItem("authenticatedUser",JSON.stringify(this.authenticatedUser));
+    }
+    else{
+      this.authenticated=false;
+    }
   }
-public isAdmin(){
-if (this.userAuthenticated){
-if (this.userAuthenticated.roles.indexOf('ADMIN')>-1)
-  return true;
-}
-return false;
-}
-public saveAuthenticateUser(){
-  if (this.userAuthenticated){
-    localStorage.setItem('authToken', this.token);
+
+  loadUser(){
+    let user=localStorage.getItem('authenticatedUser');
+    if(user){
+      this.authenticatedUser=JSON.parse(user);
+      this.authenticated=true;
+    }
   }
-}
-public loadAuthenticatedUserFromLoacalStorage(){
-  let t = localStorage.getItem('authToken');
-  if(t){
-   let user=JSON.parse(atob(t));
-   console.log(user);
-   this.userAuthenticated={username:user.username,roles:user.roles};
-   console.log(this.isAuthenticated);
-   this.isAuthenticated=true; 
-   this.token=t;
+
+  isAdmin(){
+    if(this.authenticatedUser){
+      return this.authenticatedUser.roles.indexOf("ADMIN")>-1;
+    }
+    else return false;
   }
+
+  isAuthenticated(){
+    return this.authenticated;
+  }
+  logout(){
+    this.authenticated=false;
+    this.authenticatedUser=undefined;
+    localStorage.removeItem('authenticatedUser');
+  }
+  
+  
+
 }
 
-public removeTokenFromLocalStorage(){
-  localStorage.removeItem('authToken');
-  this.isAuthenticated=false;
-  this.token=undefined;
-  this.userAuthenticated=undefined;
-}
-}
- 
+
+
+
+
+
+

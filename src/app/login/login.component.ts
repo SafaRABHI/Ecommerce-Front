@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { Router } from '@angular/router';
+import { CaddyService } from '../services/caddy.service';
 
 @Component({
   selector: 'app-login',
@@ -9,15 +10,18 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private authService:AuthenticationService,private router:Router) { }
+  constructor(private authService:AuthenticationService,
+              private router:Router,
+              private caddyService:CaddyService) { }
 
   ngOnInit() {
   }
-  onLogin(dataForm: any) {
-    this.authService.login(dataForm.username,dataForm.password);
-    if(this.authService.isAuthenticated){
-      this.authService.saveAuthenticateUser();
+
+  onLogin(user){
+    this.authService.login(user.username,user.password);
+    if(this.authService.isAuthenticated()){
+      this.caddyService.loadCaddyFromLocalStorage();
       this.router.navigateByUrl('');
     }
-  }
-}
+
+  }}

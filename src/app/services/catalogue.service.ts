@@ -1,7 +1,9 @@
+  
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product } from './model/product.model';
+import { Product } from '../model/product.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -25,5 +27,8 @@ export class CatalogueService {
    });
    return this.http.request(req);
 
+  }
+  public patchResource(url,data){
+    return this.http.patch(url,data);
   }
 }

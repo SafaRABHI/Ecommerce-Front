@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { CatalogueService } from '../catelogue.service';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { AuthenticationService } from '../services/authentication.service';
 import { Product } from '../model/product.model';
 import { CaddyService } from '../services/caddy.service';
+import { CatalogueService } from '../services/catalogue.service';
+import { ProductItem } from '../model/product-item.model';
 @Component({
   selector: 'app-products',
   templateUrl: './products.component.html',
@@ -74,6 +75,7 @@ private timestamp: number=0;
     })
 
   }
+ 
   onEditPhoto(p) {
     this.currentProduct=p;
     this.editPhoto=true;
@@ -111,11 +113,18 @@ public isAdmin(){
 }
 onProductDetails(p:Product){
   let url=btoa(p._links.product.href);
-  this.router.navigateByUrl("product-detail/"+url);
+  this.router.navigateByUrl("/product/"+p.id);
 
 }
+
 onAddProductToCaddy(p:Product) {
-  this.caddyService.addProductToCaddy(p);
+  if(!this.authService.isAuthenticated()){
+    this.router.navigateByUrl("/login");
+  }
+  else{
+    this.caddyService.addProduct(p);
+  }
+  
 }
 
 }

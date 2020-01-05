@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CatalogueService } from './catelogue.service';
 import { from, Subscriber } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthenticationService } from './services/authentication.service';
 import { CaddyService } from './services/caddy.service';
+import { CatalogueService } from './services/catalogue.service';
 
 @Component({
   selector: 'app-root',
@@ -11,48 +11,60 @@ import { CaddyService } from './services/caddy.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
- private categories;
- private currentCategorie;
+   categories;
+   currentCategorie;
 
-  constructor(private catService:CatalogueService, private router:Router,private authService:AuthenticationService,
-    public caddyService:CaddyService
-    ){}
-  
+  constructor(public catService:CatalogueService,
+              private  router:Router,
+              public caddyService:CaddyService,
+              public authService:AuthenticationService){}
+
   ngOnInit(): void {
-    this.authService.loadAuthenticatedUserFromLoacalStorage();
     this.getCategories();
+    this.authService.loadUser();
+    if(this.authService.isAuthenticated())
+     this.caddyService.loadCaddyFromLocalStorage();
   }
+
   private getCategories() {
-   this.catService.getRessource("/categories")
-   .subscribe(data=>{
-     this.categories=data;
-   },err=>{
-     console.log(err);
    
-   })
+    this.catService.getRessource("/categories")
+      .subscribe(data=>{
+        this.categories=data;
+      },err=>{
+        console.log(err);
+      })
+
+
   }
- 
+
   getProductsByCat(c) {
     this.currentCategorie=c;
     this.router.navigateByUrl('/products/2/'+c.id);
   }
 
   onSelectedProducts() {
-this.currentCategorie=undefined;
-this.router.navigateByUrl("/products/1/0");
-
+    this.currentCategorie=undefined;
+    this.router.navigateByUrl("/products/1/0");
   }
+
   onProductsPromo() {
-this.currentCategorie=undefined;
-this.router.navigateByUrl("/products/3/0");
-
+    this.currentCategorie=undefined;
+    this.router.navigateByUrl("/products/3/0");
   }
+
   onProductsDispo() {
     this.currentCategorie=undefined;
-this.router.navigateByUrl("/products/4/0"); 
+    this.router.navigateByUrl("/products/4/0");
   }
+
+  onLogin() {
+    this.router.navigateByUrl('/login');
+  }
+
   onLogout() {
-    this.authService.removeTokenFromLocalStorage();
+    this.caddyService.emptyCaddy();
+    this.authService.logout();
     this.router.navigateByUrl('/login');
   }
 }
